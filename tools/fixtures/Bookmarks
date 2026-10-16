@@ -1,0 +1,48 @@
+{
+  "roots": {
+    "bookmark_bar": {
+      "type": "folder",
+      "name": "Barre",
+      "children": [
+        {
+          "type": "url",
+          "name": "Brave Search",
+          "url": "https://search.brave.com/"
+        },
+        {
+          "type": "folder",
+          "name": "Travail",
+          "children": [
+            {
+              "type": "url",
+              "name": "Notion",
+              "url": "https://www.notion.so/"
+            },
+            {
+              "type": "url",
+              "name": "Figma",
+              "url": "https://www.figma.com/"
+            }
+          ]
+        }
+      ]
+    },
+    "other": {
+      "type": "folder",
+      "name": "Autres",
+      "children": [
+        {
+          "type": "url",
+          "name": "",
+          "url": "https://example.org/"
+        }
+      ]
+    },
+    "synced": {
+      "type": "folder",
+      "name": "Appareils",
+      "children": []
+    }
+  },
+  "version": 1
+}

@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark light">
+<title>Bienvenue dans Nova</title>
+<style>
+  :root{
+    --bg:#1a1b1f; --card:#202127; --card-hover:#26272e; --text:#eceef2; --muted:#9a9ca7;
+    --line:#2b2c33; --line-2:#35363e; --accent:#6b75e8; --accent-2:#6b75e8;
+    --switch-off:#34353d;
+    --font:"Segoe UI Variable Text","Segoe UI",Inter,-apple-system,system-ui,Roboto,sans-serif;
+  }
+  /* L'assistant de premier lancement n'avait aucune palette claire : il restait
+     sombre même après avoir choisi le thème clair. */
+  html[data-theme="light"]{
+    --bg:#f5f6f8; --card:#fff; --card-hover:#f1f2f5; --text:#15161a; --muted:#5f616d;
+    --line:#e2e4e9; --line-2:#d5d8de; --switch-off:#cdcfd6;
+  }
+  html[data-theme="light"] .glow{opacity:.20}
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);
+    display:flex;align-items:center;justify-content:center;padding:32px;user-select:none;
+  }
+  .glow{position:fixed;inset:-20% 10% 30% 10%;pointer-events:none;filter:blur(100px);opacity:.42;
+    background:radial-gradient(circle at 25% 25%,#7a6bff 0,transparent 55%),radial-gradient(circle at 75% 15%,#3ac1ff 0,transparent 50%)}
+  .wrap{position:relative;width:min(940px,94vw);z-index:1}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  header svg{width:34px;height:34px}
+  h1{margin:0;font-size:27px;font-weight:660;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13.5px;margin:6px 0 26px;max-width:640px;line-height:1.55}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;cursor:pointer;
+    transition:transform .12s ease,border-color .12s ease;position:relative;
+  }
+  .card:hover{transform:translateY(-3px);border-color:var(--accent)}
+  .card.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(122,107,255,.18)}
+  .card .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .logo{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-weight:750;color:#fff;font-size:15px}
+  .card h3{margin:0;font-size:15.5px;font-weight:620}
+  .card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
+  .card .check{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:99px;
+    border:1.6px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent}
+  .card.sel .check{background:var(--accent);border-color:var(--accent);color:#fff}
+  .others{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:12.5px}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;
+    background:var(--card);border:1px solid var(--line);cursor:pointer;font-size:12.5px}
+  /* Texte blanc codé en dur : illisible sur fond clair. */
+  .chip:hover{background:var(--card-hover);color:var(--text)}
+  .chip.on{border-color:var(--accent);color:var(--text)}
+  .chip .sw{width:14px;height:14px;border-radius:4px;overflow:hidden;flex:0 0 auto}
+  .opts{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;font-size:13px}
+  .opt .txt{flex:1}
+  .opt small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .switch{width:42px;height:24px;border-radius:99px;background:var(--switch-off);border:0;position:relative;cursor:pointer;flex:0 0 auto}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:99px;background:#fff;transition:transform .15s}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{transform:translateX(18px)}
+  .actions{margin-top:26px;display:flex;align-items:center;gap:14px}
+  .go{
+    padding:12px 26px;border-radius:12px;border:0;cursor:pointer;font-size:14px;font-weight:600;color:#fff;
+    background:linear-gradient(135deg,#7a6bff,#3ac1ff);font-family:inherit;
+  }
+  .go:disabled{opacity:.45;cursor:default}
+  .note{color:var(--muted);font-size:11.5px;line-height:1.5;max-width:420px}
+
+  /* ---------- étape 2 : navigateurs dont on reprend les données ---------- */
+  .apps{display:flex;flex-direction:column;gap:6px;margin-top:18px;max-width:620px}
+  .app{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
+       border-radius:11px;padding:11px 14px;cursor:pointer}
+  .app:hover{background:var(--card-hover);border-color:var(--line-2)}
+  .app .logo{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;
+       justify-content:center;color:#fff;font-weight:600;font-size:12px;flex:0 0 auto}
+  .app .txt{flex:1;min-width:0}
+  .app .txt b{font-size:12.5px;font-weight:560}
+  .app .txt small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;
+       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .app .box{width:18px;height:18px;border-radius:5px;border:1px solid var(--line-2);flex:0 0 auto;
+       display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
+  .app.on .box{background:var(--accent);border-color:var(--accent);color:#fff}
+  .apps .vide{color:var(--muted);font-size:12px}
+  .actions .chip{height:34px;padding:0 14px;border-radius:8px}
+
+  /* ---------- habillage 1.3 : assistant de premier lancement ---------- */
+  header svg{width:28px;height:28px}
+  header h1{font-size:20px;font-weight:640;letter-spacing:-.022em}
+  .sub{color:var(--muted);font-size:12.5px;line-height:1.6;max-width:620px}
+  .cards{gap:10px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .card{border-radius:11px;padding:14px}
+  .card:hover{background:var(--card-hover);border-color:var(--line-2)}
+  .chip{height:28px;padding:0 11px;border-radius:7px;background:transparent;border-color:transparent;color:var(--muted)}
+  .chip:hover{background:var(--card-hover);border-color:transparent;color:var(--text)}
+  .chip.on{background:var(--card-hover);border-color:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-2)}
+  .chip .sw{width:14px;height:14px;border-radius:4px}
+  .chip .sw img,.card .logo img{width:100%;height:100%;display:block;object-fit:contain;border-radius:4px}
+  .opt{border-radius:11px;padding:12px 14px}
+  .go{height:34px;padding:0 16px;border-radius:8px;font-weight:550;
+      background:var(--accent);color:#fff;border:0;cursor:pointer}
+  .go:disabled{opacity:.45;cursor:default}
+  .go:hover:not(:disabled){background:#7c85ec}
+  .step2,.step3{display:none}
+  body[data-step="2"] .step1{display:none}
+  body[data-step="2"] .step2{display:block}
+  body[data-step="3"] .step1,body[data-step="3"] .step2{display:none}
+  body[data-step="3"] .step3{display:block}
+</style>
+
+<style>
+/* ==================================================================
+   Habillage 1.3 — sobre et posé, dans l'esprit d'Arc.
+   Cette couche est ajoutée après la feuille d'origine : elle retire les
+   marqueurs « décoratifs » (dégradés, halos flous, ombres lourdes, pastilles
+   pilule, survols qui font sauter les éléments) et aligne les composants sur
+   une même grille de 4 px.
+   ================================================================== */
+  *{letter-spacing:-.006em}
+  h1{font-size:19px;font-weight:640;letter-spacing:-.022em;margin:0 0 4px}
+  h2{font-size:10.5px;letter-spacing:.085em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+  .lead{font-size:12.5px;line-height:1.55;color:var(--muted);margin-bottom:22px}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:6px}
+  .glow{display:none}
+
+  /* --- cartes et lignes --- */
+  .card{border:1px solid var(--line);border-radius:12px;box-shadow:none;overflow:hidden}
+  .row{gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}
+  .row .txt b{font-weight:560}
+  .row small{font-size:11.5px;line-height:1.5;margin-top:2px}
+
+  /* --- boutons --- */
+  .btn{
+    height:28px;padding:0 11px;border-radius:7px;background:var(--card);border:1px solid var(--line);
+    color:var(--text);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;
+    justify-content:center;gap:6px;transition:background .12s,border-color .12s;
+  }
+  .btn:hover{background:var(--card-hover);border-color:var(--line-2)}
+  .btn.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:550}
+  .btn.primary:hover{background:#7c85ec;border-color:transparent}
+  .btn.danger{color:var(--danger);border-color:rgba(229,83,75,.32);background:transparent}
+  .btn.danger:hover{background:rgba(229,83,75,.10);border-color:rgba(229,83,75,.45)}
+
+  /* --- interrupteurs --- */
+  .switch{width:36px;height:20px;border-radius:999px;background:var(--switch-off)}
+  .switch::after{width:14px;height:14px;top:3px;left:3px;box-shadow:0 1px 2px rgba(0,0,0,.22)}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{transform:translateX(16px)}
+
+  /* --- contrôles segmentés --- */
+  .seg{border-radius:8px;padding:2px;background:var(--card-hover);border-color:var(--line)}
+  .seg button{border-radius:6px;font-weight:500}
+  .seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.16)}
+  html[data-theme="light"] .seg button.on{background:#fff;box-shadow:0 1px 2px rgba(16,17,22,.08)}
+
+  /* --- pastilles et étiquettes --- */
+  .badge{border-radius:6px;font-weight:500;padding:2px 7px}
+
+  /* --- tableaux --- */
+  table{font-size:12.5px}
+  td{padding:8px 0}
+  kbd{border-radius:5px;font-size:10.5px}
+</style>
+</head>
+<body data-step="1">
+
+<div class="wrap">
+  <header>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2.6" y="2.6" width="18.8" height="18.8" rx="5.6" fill="var(--accent)"/>
+      <path d="M8.7 16.3V8.1l6.6 8.2V8.1" fill="none" stroke="#fff" stroke-width="1.7"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h1>Bienvenue dans Nova</h1>
+  </header>
+
+  <div class="step1">
+    <p class="sub">
+      Nova est un navigateur à <b>onglets verticaux</b> : les onglets vivent dans une barre latérale,
+      à gauche, et la page respire sur toute la largeur restante.
+      Première étape : choisissez le moteur de recherche qui recevra vos recherches par défaut.
+      Vous pourrez en changer à tout moment, et même forcer un moteur ponctuellement avec
+      <b>!b</b>, <b>!e</b>, <b>!g</b>…
+    </p>
+
+    <div class="cards" id="mainCards"></div>
+    <div class="others">
+      <span>Autres moteurs :</span>
+      <span id="otherChips" style="display:contents"></span>
+    </div>
+
+    <div class="actions">
+      <button class="go" id="next" disabled>Continuer</button>
+      <span class="note" id="chosen">Aucun moteur sélectionné.</span>
+    </div>
+  </div>
+
+  <div class="step2" id="stepImport">
+    <p class="sub">
+      Vos <b>favoris</b> et votre <b>historique</b> peuvent venir du navigateur que vous utilisiez déjà. Cochez les navigateurs dont Nova doit reprendre les données — l'autre navigateur
+      n'est pas modifié, les doublons sont écartés, et vous pouvez tout reprendre plus tard dans
+      <b>Paramètres &gt; Importer…</b>
+    </p>
+
+    <div class="apps" id="apps"></div>
+
+    <div class="actions">
+      <button class="go" id="doImport" disabled>Importer la sélection</button>
+      <button class="chip" id="toOptions">Plus tard</button>
+      <button class="go" id="afterImport" style="display:none">Continuer</button>
+      <span class="note" id="importNote">Recherche des navigateurs installés…</span>
+    </div>
+  </div>
+
+  <div class="step3">
+    <p class="sub">
+      Derniers réglages. Tout est modifiable ensuite dans <b>Paramètres</b> (Ctrl+,).
+    </p>
+
+    <div class="opts">
+      <div class="opt">
+        <div class="txt">Bloquer publicités et traqueurs
+          <small>Liste locale de régies publicitaires : leur résolution est neutralisée
+          dans le moteur de rendu, sans aucune connexion sortante.
+          Désactivez cette option si un site se comporte mal.</small>
+        </div>
+        <button class="switch on" id="swBlock" aria-label="Bloquer les traqueurs"></button>
+      </div>
+      <div class="opt">
+        <div class="txt">Restaurer mes onglets à l'ouverture
+          <small>Nova enregistre votre session et la rouvre au prochain démarrage.</small>
+        </div>
+        <button class="switch on" id="swRestore" aria-label="Restaurer la session"></button>
+      </div>
+      <div class="opt">
+        <div class="txt">Supprimer le message de Windows sur l'overlay de jeu
+          <small>Un jeu, une manette ou la touche <b>Win+G</b> font réclamer à Windows la
+          barre de jeux Xbox ; comme elle n'est pas installée, une boîte « Obtenir une
+          application pour ouvrir ce lien » s'ouvre. Nova coupe cette demande pour votre seul
+          compte (aucun droit administrateur, réversible).</small>
+        </div>
+        <button class="switch on" id="swOverlay" aria-label="Supprimer le message de Windows"></button>
+      </div>
+      <div class="opt">
+        <div class="txt">Thème sombre
+          <small>Interface sombre, comme l'assistant que vous regardez. Un thème clair est disponible.</small>
+        </div>
+        <button class="switch on" id="swDark" aria-label="Thème sombre"></button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="go" id="start">Ouvrir Nova</button>
+      <span class="note">Moteur retenu : <b id="finalEngine">—</b>. Nova s'ouvre avec un onglet vierge.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  let N = window.__NOVA__ || {engines:[], config:{}};
+  const post = (obj) => {
+    const json = JSON.stringify(obj);
+    try { window.ipc.postMessage(json); }
+    catch (e) { try { window.chrome.webview.postMessage(json); } catch (e2) {} }
+  };
+
+  /* Thème appliqué dès l'affichage, « Système » déjà résolu par Rust. */
+  function applyTheme(){
+    const dark = (typeof N.dark === "boolean") ? N.dark : (N.config && N.config.theme !== "light");
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    if (window.NovaSkin) window.NovaSkin.apply(N.ui_bg);
+  }
+  applyTheme();
+
+  const MAIN = ["google","brave","ecosia"];
+  let chosen = null;
+
+  function makeCard(eng){
+    const c = document.createElement("div");
+    c.className = "card";
+    c.dataset.id = eng.id;
+    const top = document.createElement("div");
+    top.className = "top";
+    const logo = document.createElement("div");
+    logo.className = "logo";
+    if (window.NovaEngineIcon) window.NovaEngineIcon(logo, eng);
+    else {
+      logo.style.background = eng.color;
+      logo.textContent = eng.name.charAt(0).toUpperCase();
+    }
+    const h = document.createElement("h3");
+    h.textContent = eng.name;
+    top.append(logo, h);
+    const p = document.createElement("p");
+    p.textContent = eng.note || "";
+    const check = document.createElement("div");
+    check.className = "check";
+    check.textContent = "✓";
+    c.append(top, p, check);
+    c.addEventListener("click", () => select(eng.id));
+    return c;
+  }
+
+  const cards = document.getElementById("mainCards");
+  N.engines.filter((e) => MAIN.indexOf(e.id) !== -1).forEach((e) => cards.appendChild(makeCard(e)));
+
+  const others = document.getElementById("otherChips");
+  N.engines.filter((e) => MAIN.indexOf(e.id) === -1).forEach((e) => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.dataset.id = e.id;
+    const sw = document.createElement("span");
+    sw.className = "sw";
+    if (window.NovaEngineIcon) window.NovaEngineIcon(sw, e);
+    else sw.style.background = e.color;
+    const t = document.createElement("span");
+    t.textContent = e.name;
+    chip.append(sw, t);
+    chip.addEventListener("click", () => select(e.id));
+    others.appendChild(chip);
+  });
+
+  function select(id){
+    chosen = id;
+    document.querySelectorAll(".card").forEach((c) => c.classList.toggle("sel", c.dataset.id === id));
+    document.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.id === id));
+    const eng = N.engines.find((e) => e.id === id);
+    document.getElementById("chosen").textContent = "Moteur choisi : " + eng.name + " — " + eng.note;
+    document.getElementById("finalEngine").textContent = eng.name;
+    document.getElementById("next").disabled = false;
+  }
+
+  /* ---------- étape 2 : import des données d'un autre navigateur ---------- */
+  let apps = [];
+  let coches = null;      // null = tout ce qui est détecté
+  let importe = false;
+
+  function grouper(liste){
+    const out = [];
+    const index = {};
+    (liste || []).forEach((src) => {
+      const cle = src.app_id || src.app || src.name;
+      if (!index[cle]) {
+        index[cle] = {id:cle, nom:src.app || src.name, favoris:0, historique:0, profils:{},
+                      chemins:[]};
+        out.push(index[cle]);
+      }
+      const a = index[cle];
+      a.profils[src.name] = true;
+      a.chemins.push(src.path);
+      if ((src.kind || "").toLowerCase() === "favoris") a.favoris++; else a.historique++;
+    });
+    out.sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+    return out;
+  }
+
+  function couleur(nom){
+    let h = 0;
+    for (let i = 0; i < nom.length; i++) h = (h * 31 + nom.charCodeAt(i)) % 360;
+    return "hsl(" + h + ",45%,42%)";
+  }
+
+  function dessinerApps(){
+    const box = document.getElementById("apps");
+    const note = document.getElementById("importNote");
+    box.textContent = "";
+    apps = grouper(N.import_sources);
+    if (!apps.length) {
+      const d = document.createElement("div");
+      d.className = "vide";
+      d.textContent = (N.import_busy ? "Recherche des navigateurs installés…" :
+        "Aucun navigateur détecté. Vous pourrez en désigner un vous-même dans Paramètres > Importer…");
+      box.appendChild(d);
+      document.getElementById("doImport").disabled = true;
+      if (N.import_busy) note.textContent = "Recherche des navigateurs installés…";
+      return;
+    }
+    if (coches === null) coches = apps.map((a) => a.id);
+
+    apps.forEach((app) => {
+      const row = document.createElement("div");
+      row.className = "app" + (coches.indexOf(app.id) !== -1 ? " on" : "");
+      const logo = document.createElement("div");
+      logo.className = "logo";
+      logo.style.background = couleur(app.nom);
+      logo.textContent = (app.nom.trim().charAt(0) || "?").toUpperCase();
+      const txt = document.createElement("div");
+      txt.className = "txt";
+      const b = document.createElement("b");
+      b.textContent = app.nom;
+      const small = document.createElement("small");
+      const bouts = [];
+      if (app.favoris) bouts.push("favoris");
+      if (app.historique) bouts.push("historique");
+      const nbProfils = Object.keys(app.profils).length;
+      small.textContent = bouts.join(" + ") + (nbProfils > 1 ? " · " + nbProfils + " profils" : "") +
+                          " · " + app.chemins[0];
+      txt.append(b, small);
+      const box2 = document.createElement("div");
+      box2.className = "box";
+      box2.textContent = "✓";
+      row.append(logo, txt, box2);
+      row.addEventListener("click", () => {
+        const i = coches.indexOf(app.id);
+        if (i === -1) coches.push(app.id);
+        else if (coches.length > 0 && apps.length > 1) coches.splice(i, 1);
+        if (coches.indexOf(app.id) === -1 && i === -1) coches.splice(i, 0);
+        row.classList.toggle("on", coches.indexOf(app.id) !== -1);
+        maj();
+      });
+      box.appendChild(row);
+    });
+    maj();
+  }
+
+  function maj(){
+    const btn = document.getElementById("doImport");
+    btn.disabled = !coches || coches.length === 0;
+    const note = document.getElementById("importNote");
+    if (importe) return;
+    if (!coches) { note.textContent = "Recherche des navigateurs installés…"; return; }
+    const noms = apps.filter((a) => coches.indexOf(a.id) !== -1).map((a) => a.nom);
+    note.textContent = noms.length ? "Sera repris de : " + noms.join(", ")
+      : "Aucun navigateur sélectionné.";
+  }
+
+  function lancerImport(){
+    const ids = [];
+    (N.import_sources || []).forEach((src) => {
+      const cle = src.app_id || src.app || src.name;
+      if (coches.indexOf(cle) !== -1) ids.push(src.id);
+    });
+    importe = true;
+    document.getElementById("doImport").disabled = true;
+    document.getElementById("importNote").textContent = "Import en cours…";
+    post({cmd:"import_run", ids:ids, favorites:true, history:true, replace:false});
+  }
+
+  document.getElementById("doImport").addEventListener("click", lancerImport);
+  document.getElementById("toOptions").addEventListener("click", () => { document.body.dataset.step = "3"; });
+  document.getElementById("afterImport").addEventListener("click", () => { document.body.dataset.step = "3"; });
+
+  document.getElementById("next").addEventListener("click", () => { document.body.dataset.step = "2"; });
+
+  function bindSwitch(id){
+    const sw = document.getElementById(id);
+    sw.addEventListener("click", () => sw.classList.toggle("on"));
+    return sw;
+  }
+  const swBlock = bindSwitch("swBlock");
+  const swRestore = bindSwitch("swRestore");
+  const swDark = bindSwitch("swDark");
+  const swOverlay = bindSwitch("swOverlay");
+  /* Le réglage « thème sombre » se voit immédiatement : il ne faisait rien. */
+  swDark.addEventListener("click", () => {
+    N.dark = swDark.classList.contains("on");
+    applyTheme();
+  });
+
+  /* Rust pousse l'état (liste des navigateurs, résultat de l'import). */
+  window.NovaPage = {
+    render(state){
+      N = state;
+      applyTheme();
+      dessinerApps();
+      const res = state.import_result;
+      if (importe && res) {
+        const fav = res.favorites || 0;
+        const vis = res.visits || 0;
+        document.getElementById("importNote").textContent =
+          (fav || vis) ? (fav + " favori(s) et " + vis + " visite(s) repris.")
+                       : "Rien de nouveau à reprendre (tout était déjà là).";
+        document.getElementById("doImport").style.display = "none";
+        document.getElementById("toOptions").style.display = "none";
+        document.getElementById("afterImport").style.display = "";
+      } else if (!importe && state.import_busy === false && (state.import_sources || []).length) {
+        maj();
+      }
+    },
+    toast(){}
+  };
+
+  document.getElementById("start").addEventListener("click", () => {
+    post({cmd:"finish_onboarding", engine:chosen,
+      block_trackers:swBlock.classList.contains("on"),
+      restore_session:swRestore.classList.contains("on"),
+      theme:swDark.classList.contains("on") ? "dark" : "light",
+      silence_game_overlay:swOverlay.classList.contains("on")});
+  });
+})();
+</script>
+</body>
+</html>

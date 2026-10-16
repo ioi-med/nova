@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark light">
+<title>Historique — Nova</title>
+<style>
+  :root{
+    --bg:#1a1b1f; --card:#202127; --card-hover:#26272e; --text:#eceef2; --muted:#9a9ca7;
+    --line:#2b2c33; --line-2:#35363e; --accent:#6b75e8; --accent-2:#6b75e8; --danger:#e5534b;
+    --font:"Segoe UI Variable Text","Segoe UI",Inter,-apple-system,system-ui,Roboto,sans-serif;
+  }
+  html[data-theme="light"]{
+    --bg:#f5f6f8; --card:#fff; --card-hover:#f1f2f5; --text:#15161a; --muted:#5f616d; --line:#e2e4e9;
+    --line-2:#d5d8de;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:13.5px}
+  .page{max-width:900px;margin:0 auto;padding:34px 26px 70px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+  h1{font-size:22px;margin:0;letter-spacing:-.3px}
+  .spacer{flex:1}
+  .lead{color:var(--muted);font-size:12.5px;margin:4px 0 20px}
+  .bar{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+  input[type=search]{
+    flex:1;padding:9px 13px;border-radius:11px;border:1px solid var(--line);background:var(--card);
+    color:var(--text);font-family:inherit;font-size:13px;outline:none;
+  }
+  input[type=search]:focus{border-color:var(--accent)}
+  .btn{padding:9px 15px;border-radius:11px;border:1px solid var(--line);background:var(--card);
+    color:var(--text);font-family:inherit;font-size:12.5px;cursor:pointer}
+  .btn:hover{background:var(--card-hover)}
+  .btn.danger{color:#ff6b6b;border-color:rgba(255,107,107,.4)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .group{padding:9px 15px 4px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.7px}
+  .item{display:flex;align-items:center;gap:11px;padding:9px 15px;border-top:1px solid var(--line);cursor:default}
+  .item:hover{background:var(--card-hover)}
+  .item .fav{
+    width:26px;height:26px;border-radius:8px;flex:0 0 auto;display:flex;align-items:center;
+    justify-content:center;font-weight:700;font-size:11px;color:#fff;overflow:hidden;
+    position:relative;
+  }
+  /* Le favicon recouvre la lettre de repli (avant : les deux s'affichaient). */
+  .item .fav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  /* La lettre s'efface quand le vrai favicon est affiché. */
+  .item .fav.has-img .letter{visibility:hidden}
+  .item .fav.has-img{background:#e9e9f2}
+  .item .txt{flex:1;min-width:0}
+  .item .t{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .u{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item .when{color:var(--muted);font-size:11.5px;white-space:nowrap}
+  .item .del{width:22px;height:22px;border-radius:7px;border:0;background:none;color:var(--muted);
+    cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px}
+  .item:hover .del{display:flex}
+  .item .del:hover{background:var(--bg);color:var(--text)}
+  .empty{padding:22px 15px;color:var(--muted);font-size:12.5px}
+  .more{padding:12px 15px;text-align:center}
+</style>
+
+<style>
+/* ==================================================================
+   Habillage 1.3 — sobre et posé, dans l'esprit d'Arc.
+   Cette couche est ajoutée après la feuille d'origine : elle retire les
+   marqueurs « décoratifs » (dégradés, halos flous, ombres lourdes, pastilles
+   pilule, survols qui font sauter les éléments) et aligne les composants sur
+   une même grille de 4 px.
+   ================================================================== */
+  *{letter-spacing:-.006em}
+  h1{font-size:19px;font-weight:640;letter-spacing:-.022em;margin:0 0 4px}
+  h2{font-size:10.5px;letter-spacing:.085em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+  .lead{font-size:12.5px;line-height:1.55;color:var(--muted);margin-bottom:22px}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:6px}
+  .glow{display:none}
+
+  /* --- cartes et lignes --- */
+  .card{border:1px solid var(--line);border-radius:12px;box-shadow:none;overflow:hidden}
+  .row{gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}
+  .row .txt b{font-weight:560}
+  .row small{font-size:11.5px;line-height:1.5;margin-top:2px}
+
+  /* --- boutons --- */
+  .btn{
+    height:28px;padding:0 11px;border-radius:7px;background:var(--card);border:1px solid var(--line);
+    color:var(--text);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;
+    justify-content:center;gap:6px;transition:background .12s,border-color .12s;
+  }
+  .btn:hover{background:var(--card-hover);border-color:var(--line-2)}
+  .btn.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:550}
+  .btn.primary:hover{background:#7c85ec;border-color:transparent}
+  .btn.danger{color:var(--danger);border-color:rgba(229,83,75,.32);background:transparent}
+  .btn.danger:hover{background:rgba(229,83,75,.10);border-color:rgba(229,83,75,.45)}
+
+  /* --- interrupteurs --- */
+  .switch{width:36px;height:20px;border-radius:999px;background:var(--switch-off)}
+  .switch::after{width:14px;height:14px;top:3px;left:3px;box-shadow:0 1px 2px rgba(0,0,0,.22)}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{transform:translateX(16px)}
+
+  /* --- contrôles segmentés --- */
+  .seg{border-radius:8px;padding:2px;background:var(--card-hover);border-color:var(--line)}
+  .seg button{border-radius:6px;font-weight:500}
+  .seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.16)}
+  html[data-theme="light"] .seg button.on{background:#fff;box-shadow:0 1px 2px rgba(16,17,22,.08)}
+
+  /* --- pastilles et étiquettes --- */
+  .badge{border-radius:6px;font-weight:500;padding:2px 7px}
+
+  /* --- tableaux --- */
+  table{font-size:12.5px}
+  td{padding:8px 0}
+  kbd{border-radius:5px;font-size:10.5px}
+</style>
+<style>
+/* ---------- habillage 1.3 : historique lisible ---------- */
+  .page{max-width:860px;padding:28px 26px 64px}
+  .bar{gap:8px;margin:16px 0 12px}
+  .item{gap:12px;padding:9px 14px;border-top:1px solid var(--line)}
+  .item:hover{background:var(--card-hover)}
+  .item .t{font-size:12.5px;font-weight:500}
+  .item .u{font-size:11.5px;color:var(--muted)}
+  .item .when{font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .item .fav{width:16px;height:16px;border-radius:4px;font-size:9.5px;font-weight:600}
+  .item .del{width:22px;height:22px;border-radius:6px;color:var(--muted)}
+  .item .del:hover{background:var(--card);color:var(--danger)}
+  .group{font-size:10.5px;letter-spacing:.085em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding:14px 14px 6px}
+  .empty{padding:18px 14px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Historique</h1>
+    <span class="spacer"></span>
+    <span class="badge" id="count" style="color:var(--muted);font-size:12px"></span>
+    <button class="btn danger" id="clear">Effacer tout l'historique</button>
+  </header>
+  <p class="lead">
+    Seules les pages réellement visitées sont enregistrées, et uniquement sur cet ordinateur
+    (<span id="datadir" style="font-family:ui-monospace,monospace"></span>).
+    Les navigations bloquées par le filtre anti-traqueurs n'apparaissent jamais ici.
+  </p>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="Rechercher dans l'historique (titre ou adresse)…" spellcheck="false" autofocus>
+    <button class="btn" id="toggle">Regrouper par jour</button>
+  </div>
+
+  <div class="card" id="list"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  let N = window.__NOVA__ || {history:[], config:{}};
+  let grouped = true;
+  const post = (obj) => {
+    const json = JSON.stringify(obj);
+    try { window.ipc.postMessage(json); }
+    catch (e) { try { window.chrome.webview.postMessage(json); } catch (e2) {} }
+  };
+  const $ = (id) => document.getElementById(id);
+
+  /* Cette page n'appliquait jamais le thème : elle restait sombre même avec
+     « Clair » choisi. `dark` est fourni par Rust (« Système » déjà résolu). */
+  function applyTheme(){
+    const dark = (typeof N.dark === "boolean") ? N.dark : (N.config && N.config.theme !== "light");
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    if (window.NovaSkin) window.NovaSkin.apply(N.ui_bg);
+  }
+  applyTheme();
+
+  function hostOf(url){
+    try { return new URL(url).hostname; } catch (e) { return url; }
+  }
+  function dayLabel(ts){
+    const d = new Date(ts * 1000);
+    const today = new Date();
+    const yesterday = new Date(Date.now() - 86400000);
+    const same = (a, b) => a.toDateString() === b.toDateString();
+    if (same(d, today)) return "Aujourd'hui";
+    if (same(d, yesterday)) return "Hier";
+    return d.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
+  }
+  function timeLabel(ts){
+    return new Date(ts * 1000).toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  function render(){
+    applyTheme();
+    const filter = ($("q").value || "").trim().toLowerCase();
+    const rows = (N.history || []).filter((h) =>
+      !filter || (h.title || "").toLowerCase().includes(filter) || h.url.toLowerCase().includes(filter));
+
+    $("count").textContent = rows.length + (rows.length > 1 ? " entrées" : " entrée");
+    $("datadir").textContent = N.data_dir || "";
+
+    const list = $("list");
+    list.textContent = "";
+    if (!rows.length) {
+      const p = document.createElement("div");
+      p.className = "empty";
+      p.textContent = filter ? "Aucun résultat pour « " + filter + " »." : "Aucune page dans l'historique.";
+      list.appendChild(p);
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    let currentDay = null;
+    rows.forEach((h) => {
+      if (grouped) {
+        const day = dayLabel(h.ts);
+        if (day !== currentDay) {
+          currentDay = day;
+          const g = document.createElement("div");
+          g.className = "group";
+          g.textContent = day;
+          frag.appendChild(g);
+        }
+      }
+
+      const it = document.createElement("div");
+      it.className = "item";
+      it.title = h.url;
+
+      const fav = document.createElement("div");
+      fav.className = "fav";
+      const host = hostOf(h.url);
+      const letter = ((h.title || host || "?").trim().charAt(0) || "?").toUpperCase();
+      let hash = 0;
+      for (let i = 0; i < host.length; i++) hash = (hash * 31 + host.charCodeAt(i)) % 360;
+      fav.style.background = "hsl(" + hash + ",58%,48%)";
+      const fallback = document.createElement("span");
+      fallback.className = "letter";
+      fallback.textContent = letter;
+      fav.appendChild(fallback);
+      if (h.url.indexOf("http") === 0) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.src = "https://" + host + "/favicon.ico";
+        img.addEventListener("error", () => {
+          img.remove();
+          fav.classList.remove("has-img");
+          fav.style.background = "hsl(" + hash + ",58%,48%)";
+        });
+        fav.appendChild(img);
+        /* La plaque neutre remplace la teinte de repli (style inline effacé). */
+        fav.style.background = "";
+        fav.classList.add("has-img");
+      }
+
+      const txt = document.createElement("div");
+      txt.className = "txt";
+      const t = document.createElement("div"); t.className = "t"; t.textContent = h.title || h.url;
+      const u = document.createElement("div"); u.className = "u"; u.textContent = h.url;
+      txt.append(t, u);
+
+      const when = document.createElement("div");
+      when.className = "when";
+      when.textContent = grouped ? timeLabel(h.ts) : new Date(h.ts * 1000).toLocaleString("fr-FR");
+
+      const del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "✕";
+      del.title = "Supprimer cette entrée";
+      del.addEventListener("click", (e) => { e.stopPropagation(); post({cmd:"forget_url", url:h.url}); });
+
+      it.append(fav, txt, when, del);
+      it.addEventListener("click", () => post({cmd:"open_url", url:h.url, new_tab:false}));
+      it.addEventListener("auxclick", (e) => { if (e.button === 1) post({cmd:"open_url", url:h.url, new_tab:true}); });
+      frag.appendChild(it);
+    });
+    list.appendChild(frag);
+  }
+
+  window.NovaPage = { render(state){ N = state; render(); } };
+  $("q").addEventListener("input", render);
+  $("toggle").addEventListener("click", () => {
+    grouped = !grouped;
+    $("toggle").textContent = grouped ? "Regrouper par jour" : "Afficher l'heure exacte";
+    render();
+  });
+  $("clear").addEventListener("click", () => {
+    if (confirm("Effacer tout l'historique de navigation ?")) post({cmd:"clear_history"});
+  });
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+# Liste de blocage locale de Nova
+# Format : un domaine par ligne, sous-domaines inclus automatiquement.
+# Ces domaines sont résolus en « ~NOTFOUND » (échec de résolution immédiat) dans le
+# moteur de rendu : blocage réseau, sous-requêtes comprises, sans aucune connexion
+# sortante. Toute navigation de premier niveau vers eux est également refusée.
+#
+# Ce sont des régies publicitaires et des traqueurs. Aucun domaine de gestion du
+# consentement (CMP), de CDN ou de connexion tierce n'est inclus : si un site se
+# comporte mal, il suffit de désactiver l'option dans les paramètres.
+
+# --- Régies et places de marché publicitaires ---
+doubleclick.net
+googleadservices.com
+googlesyndication.com
+adservice.google.com
+adnxs.com
+adsrvr.org
+amazon-adsystem.com
+casalemedia.com
+criteo.com
+criteo.net
+openx.net
+pubmatic.com
+rubiconproject.com
+smartadserver.com
+smartclip.net
+taboola.com
+outbrain.com
+teads.tv
+tremorhub.com
+sharethrough.com
+33across.com
+indexexchange.com
+sovrn.com
+lijit.com
+gumgum.com
+media.net
+zedo.com
+adform.net
+adhigh.net
+advertising.com
+tribalfusion.com
+bidswitch.net
+1rx.io
+bidr.io
+bttrack.com
+ctnsnet.com
+emxdgt.com
+exelator.com
+flashtalking.com
+sizmek.com
+sonobi.com
+spotxchange.com
+stackadapt.com
+triplelift.com
+yieldmo.com
+yieldlab.net
+zergnet.com
+mgid.com
+revcontent.com
+adroll.com
+conversantmedia.com
+dotomi.com
+owneriq.net
+switchadhub.com
+mobfox.com
+
+# --- Plateformes de données et d'audience ---
+agkn.com
+bluekai.com
+demdex.net
+everesttech.net
+krxd.net
+mathtag.com
+rlcdn.com
+tapad.com
+turn.com
+xaxis.com
+2o7.net
+omtrdc.net
+adobedtm.com
+agkn.net
+adsymptotic.com
+crwdcntrl.net
+exponential.com
+
+# --- Vérification publicitaire ---
+adsafeprotected.com
+moatads.com
+doubleverify.com
+integralads.com
+iasds01.com
+adscore.info
+
+# --- Réseaux publicitaires mobiles ---
+adcolony.com
+mopub.com
+applovin.com
+unityads.unity3d.com
+chartboost.com
+vungle.com
+supersonicads.com
+smaato.net
+inmobi.com
+
+# --- Mesure d'audience et analytique ---
+quantserve.com
+quantcast.com
+scorecardresearch.com
+comscore.com
+nielsen.com
+imrworldwide.com
+gemius.pl
+googletagmanager.com
+google-analytics.com
+analytics.google.com
+ssl.google-analytics.com
+
+# --- Rejeu de session et analyse comportementale ---
+hotjar.com
+mouseflow.com
+crazyegg.com
+luckyorange.com
+inspectlet.com
+sessioncam.com
+clicktale.net
+fullstory.com
+heapanalytics.com
+mixpanel.com
+amplitude.com
+segment.com
+segment.io
+statcounter.com
+ck0.eu
+
+# --- Attribution mobile ---
+kochava.com
+kochava.net
+mparticle.com
+leanplum.com
+branch.io
+appsflyer.com
+adjust.com
+tenjin.io
+singular.net
+sojern.com
+
+# --- Pixels de réseaux sociaux (publicitaires) ---
+static.ads-twitter.com
+ads.linkedin.com
+ads.pinterest.com
+ct.pinterest.com
+bat.bing.com
+connect.facebook.net
+pixel.facebook.com
+analytics.tiktok.com
+business-api.tiktok.com
+ads.tiktok.com
+tr.snapchat.com
+
+# --- Serveurs d'annonces de grands groupes ---
+pagead2.googlesyndication.com
+tpc.googlesyndication.com
+partner.googleadservices.com
+stats.g.doubleclick.net
+adserver.yahoo.com
+ads.yahoo.com
+gemini.yahoo.com
+sp1.nytimes.com
+delivery.smartclip.net
+adotmob.com
+sync.adotmob.com
+mediasquare.fr

@@ -1,0 +1,18 @@
+Nova 1.3.2 — sources
+
+* README-DEV.md    présentation du projet : fonctions, architecture, compilation, tests
+* LICENSE          licence MIT du code
+* LICENCES-TIERS.md marques et logos des moteurs, licences des composants tiers
+* doc/             rapport d'audit complet (13 passes) et planches d'écrans
+* src/  native/    sources Rust et module C
+* assets/          interface, logos des moteurs, liste de filtrage, icônes
+* tools/           scripts de compilation, de test et de contrôle visuel
+
+Recompiler :
+
+    cargo test                                   # 29 tests unitaires
+    cargo build --release                        # Windows (chaîne MSVC)
+    # ou, depuis Linux :
+    bash tools/install_chain.sh
+    cargo xwin build --release --target x86_64-pc-windows-msvc
+    bash tools/package.sh

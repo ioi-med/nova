@@ -1,0 +1,202 @@
+NOVA — navigateur web à onglets verticaux (Windows 10/11, 64 bits)
+==================================================================
+
+DÉMARRAGE
+  1. Placez Nova.exe où vous voulez (Bureau, C:\Program Files\Nova, clé USB…).
+  2. Double-cliquez. Au premier lancement, l'assistant vous fait choisir votre
+     moteur de recherche (Google, Brave Search ou Ecosia), le blocage des
+     traqueurs, la restauration de session et le thème.
+  3. C'est tout. Aucune installation, aucun fichier annexe.
+
+  Windows affichera peut-être un avertissement SmartScreen au premier
+  lancement (l'exécutable n'est pas signé numériquement) :
+  cliquez sur « Informations complémentaires » puis « Exécuter quand même ».
+
+  Prérequis : Windows 10/11 avec le moteur « Microsoft Edge WebView2 »
+  (déjà présent sur Windows 11 ; sur Windows 10 ancien, installez-le une fois
+  depuis https://developer.microsoft.com/microsoft-edge/webview2/).
+
+CE QU'IL FAUT SAVOIR
+  * Onglets à gauche, comme Arc : épinglés en haut, les autres en dessous.
+    Glissez-déposez pour réordonner, clic molette pour fermer, clic droit
+    pour le menu complet.
+  * Les onglets retrouvés au démarrage sont « en veille » : ils ne se chargent
+    qu'au moment où vous cliquez dessus. Le démarrage reste instantané même
+    avec beaucoup d'onglets, et rien ne consomme de mémoire pour rien.
+  * Favoris (apps) : cliquez sur l'étoile, à droite de la barre d'adresse,
+    pour mettre la page en favori. Vos favoris apparaissent en haut de la
+    barre latérale et sur la page du nouvel onglet. Clic droit sur une icône
+    pour la retirer.
+  * Couleur du fond : Paramètres > Apparence > Couleur du fond. Choisissez une
+    teinte ou n'importe quelle couleur : le texte s'adapte tout seul.
+  * Vidéo en plein écran : l'interface (barre latérale + barre d'adresse)
+    s'efface pour laisser toute la place à la vidéo ; elle revient quand vous
+    sortez du plein écran ou changez d'onglet.
+  * Recherche : Google, Brave Search et Ecosia sont dans le sélecteur du haut
+    de la barre latérale ; DuckDuckGo, Startpage et Qwant sont dans les
+    paramètres. Dans la barre d'adresse, « !b texte » force Brave,
+    « !e texte » force Ecosia, « !g texte » force Google.
+  * Raccourcis : Ctrl+T (nouvel onglet), Ctrl+W (fermer), Ctrl+Maj+T
+    (rouvrir), Ctrl+L (barre d'adresse), Ctrl+H (historique), Ctrl+, (réglages),
+    F11 (plein écran), F12 (outils de développement), Alt+← / Alt+→
+    (précédent / suivant), Ctrl+F (rechercher dans la page).
+  * Vos données restent chez vous : réglages dans %APPDATA%\Nova,
+    profil du moteur (cookies, cache) dans %LOCALAPPDATA%\Nova\WebView2.
+
+VIE PRIVÉE
+  Le filtrage (activé par défaut, désactivable dans Paramètres) neutralise la
+  résolution DNS de 146 domaines de régies publicitaires et de traqueurs (liste
+  livrée dans assets/trackers.txt), ce qui bloque aussi leurs sous-requêtes.
+  Aucun domaine de CDN ou de connexion tierce n'est filtré : les sites restent
+  fonctionnels.
+
+SI WINDOWS AFFICHE « OBTENIR UNE APPLICATION POUR OUVRIR CE LIEN
+'ms-gamingoverlay' »
+  Ce message est une boîte de dialogue de WINDOWS, pas de Nova. Il apparaît
+  quand une adresse utilisant le protocole « ms-gamingoverlay » est demandée
+  alors que la Xbox Game Bar n'est pas installée sur l'ordinateur (elle a été
+  désinstallée ou n'a jamais été là). Trois causes possibles :
+
+  1. Un onglet de Nova (souvent restauré d'une session précédente) ou une page
+     Web demandait ce protocole.
+  2. Une manette de jeu branchée : Windows essaie d'ouvrir la Game Bar toute
+     seule dès qu'une manette est connectée, ou quand on appuie sur le bouton
+     Xbox.
+  3. Le raccourci clavier Win+G, qui appartient à Windows et non à Nova.
+
+  Depuis la version 1.3.1, cette boîte ne doit plus apparaître du tout : Nova
+  coupe la demande à la source (captures et barre de jeux du compte courant)
+  puis vérifie au démarrage que c'est toujours le cas. En 1.3.0, cette boîte ne
+  doit plus apparaître du tout :
+  Nova prend ces adresses en charge dans VOTRE compte Windows
+  (HKCU\Software\Classes, sans droit administrateur) et les ignore en silence.
+  Ce réglage est dans Paramètres : « Message de Windows sur l'overlay de jeu ».
+  S'il est désactivé et que le message revient, le journal
+  %APPDATA%\Nova\protocoles-refuses.log dit si c'est Nova qui a tenté
+  l'ouverture, et depuis quelle page.
+
+  Si le message persiste malgré tout, la cause est côté Windows (au choix) :
+    * Réinstaller la Game Bar : winget install 9NZKPSTSNW4P  (Microsoft Store)
+    * Ou la désactiver complètement, dans une fenêtre PowerShell (sans droit
+      administrateur, pour le compte courant) :
+        reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f
+        reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f
+    * Ou, dans Paramètres > Applications > Xbox Game Bar > Options avancées,
+      mettre « Autorisations des applications en arrière-plan » sur Jamais.
+
+QUOI DE NEUF EN 1.3.2
+  * L'ICONE DE NOVA S'INSTALLE PARTOUT : elle apparait maintenant dans la barre
+    de titre et dans la barre des taches (et non plus l'icone generique de
+    Windows). Dessin assagi, comme l'interface : un carre arrondi, un seul
+    accent, un « N » blanc.
+  * LES LOGOS OFFICIELS DES MOTEURS remplacent les pastilles de couleur, sur la
+    page du nouvel onglet, dans les Parametres, dans la barre laterale et dans
+    l'assistant : Google, Brave, Ecosia, DuckDuckGo, Startpage et Qwant sont
+    desormais reconnaissables au premier regard.
+  * Les sources sont livrees a part, dans Nova-1.3.2-sources.zip, avec
+    README-DEV.md (presentation du projet : fonctions, architecture, compilation,
+    tests) et LICENCES-TIERS.md (marques et logos des moteurs, licences des
+    composants).
+
+QUOI DE NEUF EN 1.3.1
+  * LE MESSAGE DE WINDOWS NE REVIENT PLUS (vraiment). La version 1.3.0 avait
+    ferme la porte cote navigateur, mais c'est WINDOWS lui-meme qui reclame
+    l'overlay de jeu : touche Win+G, manette branchee, ou jeu qui demarre. Comme
+    la barre de jeux n'est pas installee, Windows ouvrait sa boite. Nova coupe
+    maintenant la demande A LA SOURCE, pour votre seul compte :
+      - captures et barre de jeux desactivees (HKCU, sans droit administrateur) ;
+      - un gestionnaire de secours pour ces adresses, qui ne fait rien et ne
+        montre rien (l'exe quitte immediatement).
+    Les valeurs trouvees avant l'intervention sont memorisees : decocher le
+    reglage remet exactement l'etat d'origine. Vous pouvez voir l'etat reel
+    dans Parametres (« Supprimer le message de Windows sur l'overlay de jeu »).
+    Si la boite revenait malgre tout, choisissez « Nova » puis « Toujours » :
+    Windows enregistre alors ce choix et ne redemandera plus.
+  * L'ASSISTANT DE PREMIER LANCEMENT DEMANDE QUELLE APPLICATION IMPORTER :
+    une nouvelle etape liste les navigateurs detectes (Brave, Chrome, Edge,
+    Firefox...) avec une case a cocher chacun, puis « Importer la selection »
+    ou « Plus tard ». Tant que l'assistant n'est pas termine, Nova n'importe
+    plus rien en silence : c'est vous qui decidez.
+  * Le reglage du message de Windows est aussi propose dans l'assistant.
+
+QUOI DE NEUF EN 1.3.0
+  * LE MESSAGE DE WINDOWS DISPARAIT POUR DE BON. Windows ouvre l'overlay de jeu
+    Xbox de lui-meme (touche Win+G, ou manette branchee) ; comme ce logiciel
+    n'est pas installe sur votre PC, il affichait « Obtenir une application pour
+    ouvrir ce lien ». Nova declare desormais ces trois adresses dans VOTRE
+    compte Windows uniquement (HKCU\Software\Classes) : elles aboutissent sur
+    Nova, qui les ignore en silence. Aucun droit administrateur, rien n'est
+    ecrit si la Game Bar est installee, et c'est reversible depuis les
+    Parametres (« Message de Windows sur l'overlay de jeu »).
+  * IMPORT PAR APPLICATION : la page d'import (Paramètres > Importer…) liste
+    maintenant UNE LIGNE PAR NAVIGATEUR, avec les puces « Favoris » et
+    « Historique » pour choisir precisement ce qu'on veut, et des boutons
+    « Tout selectionner » / « Rien ». Les profils multiples sont regroupes.
+  * NOUVELLE APPARENCE, plus sobre et professionnelle : palette neutre, accents
+    discrets, plus de degrade, de halo flou ni de survol qui fait sauter les
+    elements. Meme interface, moins « generee ».
+
+QUOI DE NEUF EN 1.2.1
+  * CORRECTIF IMPORTANT : la boîte de dialogue de Windows « Obtenir une
+    application pour ouvrir ce lien 'ms-gamingoverlay' » ne peut plus être
+    déclenchée par Nova. Nova vérifie désormais, AVANT de confier une adresse à
+    Windows, qu'un logiciel sait vraiment l'ouvrir ; sinon la navigation est
+    refusée et journalisée (Paramètres > « Liens non ouverts »). Les protocoles
+    de la Xbox Game Bar sont refusés dans tous les cas.
+  * Un onglet restauré dont l'adresse n'est pas ouvrable (protocole du système,
+    adresse corrompue) n'est plus rechargé au démarrage : il redevient un
+    onglet vierge. C'est ce genre d'onglet qui pouvait redemander l'ouverture
+    du protocole à CHAQUE lancement.
+  * Voir la section « SI WINDOWS AFFICHE ... » plus bas si le message apparaît
+    encore : il vient alors de Windows lui-même (manette, Win+G).
+
+QUOI DE NEUF EN 1.2.0
+  * IMPORT DEPUIS UN AUTRE NAVIGATEUR : Paramètres > « Importer depuis un autre
+    navigateur > Importer… » (ou tapez nova://import dans la barre d'adresse).
+    Nova liste les navigateurs trouvés sur la machine (Chrome, Edge, Brave,
+    Vivaldi, Opera, Ecosia, Firefox…) et importe les FAVORIS et l'HISTORIQUE.
+    Il sait aussi lire un fichier choisi à la main : export HTML de favoris,
+    fichier « Bookmarks » (JSON) ou base « History » / « places.sqlite ».
+    Deux options : fusionner (sans jamais créer de doublon) ou remplacer.
+    Rien n'est modifié dans l'autre navigateur ; les mots de passe et les
+    cookies, eux, ne sont pas importables (ils sont chiffrés par Windows avec
+    la clé du compte d'origine).
+  * IMPORT AUTOMATIQUE : activé par défaut dans les Paramètres, il relit les
+    navigateurs installés au démarrage et ajoute les données nouvelles. Lancer
+    deux fois l'import ne change rien (aucun doublon, aucun compteur gonflé).
+  * Favoris : jusqu'à 240 favoris conservés (l'import en apporte facilement
+    beaucoup) ; la barre latérale en montre 24 avec un bouton « +N » qui ouvre
+    la page du nouvel onglet, où ils sont tous affichés.
+  * Thème clair/sombre et couleur de fond : inchangés, l'import s'y adapte.
+
+QUOI DE NEUF EN 1.1.1
+  Vidéo en plein écran : le menu de gauche s'efface pour de bon. Nova surveille
+  maintenant le plein écran directement au niveau du moteur (et non plus
+  seulement via la page), avec deux sécurités supplémentaires. La fenêtre passe
+  en plein écran puis revient, comme dans Chrome.
+  Pour vérifier votre version : Paramètres (Ctrl+,) — le numéro s'affiche en
+  haut de la page (« Nova 1.3.0 »).
+
+QUOI DE NEUF EN 1.1.0
+  * Favoris (apps) : étoile dans la barre d'adresse, rangée d'icônes dans la
+    barre latérale et sur le nouvel onglet.
+  * Couleur du fond au choix (teintes prêtes + sélecteur libre).
+  * Correction : une vidéo en plein écran masque désormais la barre latérale
+    au lieu de la laisser par-dessus.
+
+CORRECTIFS DES VERSIONS 1.0.3 ET 1.0.2
+  Version 1.0.3 — audit visuel : les favicons des onglets épinglés débordaient
+  du carré, la page Historique et l'assistant de premier lancement restaient
+  sombres malgré le thème clair, les interrupteurs éteints étaient invisibles
+  en thème clair et le réglage « Système » était ignoré. Tout est corrigé.
+  Version 1.0.2 — audit du code : voir ci-dessous.
+  Cette version est le résultat d'un audit complet du code : 29 défauts ont été
+  trouvés et corrigés (adresses avec port, domaines internationaux, clignotement
+  des onglets, commandes sans effet sur un onglet en veille, page d'historique
+  qui ne se mettait pas à jour, « copier l'adresse » inopérant, page
+  nova://history manquante, compilation sans compilateur C...). Le détail, par
+  gravité, est dans RAPPORT-AUDIT.md.
+
+REMPLACER L'ICÔNE OU RECOMPILER
+  Le code source complet et les instructions de compilation sont dans le
+  fichier README.md fourni à côté de cet exécutable.

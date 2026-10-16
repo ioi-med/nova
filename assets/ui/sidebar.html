@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark light">
+<title>Nova — barre latérale</title>
+<style>
+  :root{
+    --bg:#1a1b1f; --bg-2:#202127; --bg-3:#292a31; --bg-hover:#232429;
+    --text:#eceef2; --muted:#9a9ca7; --line:#2b2c33; --line-2:#35363e; --scroll:#37383f;
+    --fav-plate:#e9e9f2;
+    --accent:#6b75e8; --accent-2:#6b75e8; --danger:#e5534b;
+    --radius:8px; --font:"Segoe UI Variable Text","Segoe UI",Inter,-apple-system,system-ui,Roboto,sans-serif;
+  }
+  html[data-theme="light"]{
+    --bg:#f5f6f8; --bg-2:#ffffff; --bg-3:#e9eaee; --bg-hover:#eceef2;
+    --text:#15161a; --muted:#5f616d; --line:#e2e4e9; --line-2:#d5d8de; --scroll:#c9cbd3;
+    --fav-plate:#f2f2f7;
+  }
+  html[data-theme="light"] .popover{box-shadow:0 18px 40px rgba(20,20,30,.18)}
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font);
+    font-size:13px; overflow:hidden; user-select:none;
+    display:flex; flex-direction:column;
+  }
+  button{font-family:inherit; color:inherit; background:none; border:0; cursor:pointer}
+  .icon-btn{
+    width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;
+    justify-content:center;color:var(--muted);flex:0 0 auto;
+  }
+  .icon-btn:hover{background:var(--bg-3);color:var(--text)}
+  .icon-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .hidden{display:none !important}
+
+  /* ---------- En-tête ---------- */
+  .brand{display:flex;align-items:center;gap:6px;padding:10px 10px 6px 12px}
+  .logo{display:flex;align-items:center;gap:7px;font-weight:650;letter-spacing:.2px;font-size:13px;color:var(--text);flex:1}
+  .logo svg{width:18px;height:18px}
+  .engine-chip{
+    display:inline-flex;align-items:center;gap:5px;max-width:120px;
+    padding:3px 8px;border-radius:99px;background:var(--bg-2);border:1px solid var(--line);
+    color:var(--muted);font-size:11px;font-weight:550;
+  }
+  .engine-chip:hover{color:var(--text);border-color:var(--bg-3)}
+  .engine-chip .dot{width:13px;height:13px;border-radius:4px;background:var(--accent);overflow:hidden;flex:0 0 auto}
+  .engine-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* ---------- Favoris (apps) ---------- */
+  .apps{display:flex;flex-wrap:wrap;gap:5px;padding:0 10px 8px;max-height:170px;overflow-y:auto}
+  /* Compteur des favoris non affichés (import volumineux). */
+  .app.app-more{
+    border:1px dashed var(--line);background:none;color:var(--muted);font-weight:600;
+    font-size:11px;cursor:pointer;
+  }
+  .app{
+    width:30px;height:30px;border-radius:9px;background:var(--bg-2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+    font-weight:600;font-size:12px;color:#fff;flex:0 0 auto;padding:0;
+  }
+  .app:hover{transform:translateY(-1px)}
+  .app .fav{
+    position:relative;width:100%;height:100%;display:flex;align-items:center;
+    justify-content:center;overflow:hidden;
+  }
+  .app .fav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .app .fav.has-img{background:var(--fav-plate)}
+  .app .fav.has-img .letter{visibility:hidden}
+
+  /* ---------- Onglets épinglés ---------- */
+  .pinned{display:flex;flex-wrap:wrap;gap:4px;padding:2px 10px 8px}
+  .pin{
+    width:30px;height:30px;border-radius:9px;background:var(--bg-2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;
+    color:#fff;position:relative;overflow:hidden;
+  }
+  .pin:hover{transform:translateY(-1px)}
+  .pin.active{outline:2px solid var(--accent);outline-offset:1px}
+  .pin .fav{
+    position:relative;width:100%;height:100%;overflow:hidden;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  /* Le favicon recouvre la lettre de repli et reste dans le carré : sans cette
+     règle, l'image s'affichait à sa taille naturelle et débordait du bouton. */
+  .pin .fav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  /* La lettre est masquée dès que le vrai favicon est affiché : sinon elle
+     apparaissait au travers des zones transparentes de l'image. */
+  .pin .fav.has-img .letter,.favicon.has-img .letter{visibility:hidden}
+  /* Plaque neutre : la teinte de repli transparaissait dans les zones
+     transparentes des favicons (le logo GitHub apparaissait rose). */
+  /* Le favicon est affiché « à l'intérieur » de sa case, avec un peu de marge :
+     les logos officiels (X, YouTube, Reddit…) sont dessinés bord à bord, et
+     sans cette marge on ne voyait qu'un rectangle plein. */
+  .favicon.has-img img{inset:1px;width:calc(100% - 2px);height:calc(100% - 2px);object-fit:contain}
+  .pin .fav.has-img,.favicon.has-img{background:var(--fav-plate)}
+
+  /* ---------- Liste des onglets ---------- */
+  .tabs{flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px 8px;display:flex;flex-direction:column;gap:2px}
+  .tabs::-webkit-scrollbar{width:8px}
+  .tabs::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:8px;border:2px solid transparent;background-clip:content-box}
+  .tab{
+    display:flex;align-items:center;gap:8px;padding:6px 6px 6px 8px;border-radius:var(--radius);
+    position:relative;cursor:default;min-height:34px;
+  }
+  .tab:hover{background:var(--bg-hover)}
+  .tab.active{background:var(--bg-3)}
+  .tab.dragging{opacity:.45}
+  .tab.drop-before::before,.tab.drop-after::after{
+    content:"";position:absolute;left:6px;right:6px;height:2px;border-radius:2px;background:var(--accent);
+  }
+  .tab.drop-before::before{top:-1px}
+  .tab.drop-after::after{bottom:-1px}
+  .favicon{
+    width:17px;height:17px;border-radius:5px;flex:0 0 auto;display:flex;align-items:center;
+    justify-content:center;font-size:10px;font-weight:700;color:#fff;background:var(--accent);
+    overflow:hidden;position:relative;
+  }
+  /* `absolute` : le favicon se superpose à la lettre au lieu de la pousser
+     (avant, la lettre restait visible à côté de l'image). */
+  .favicon img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
+  .tab .title{
+    flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+    color:var(--muted);font-size:12.5px;
+  }
+  .tab.active .title{color:var(--text)}
+  .tab .close{
+    width:18px;height:18px;border-radius:6px;display:none;align-items:center;justify-content:center;
+    color:var(--muted);font-size:14px;line-height:1;
+  }
+  .tab:hover .close,.tab.active .close{display:flex}
+  .tab .close:hover{background:var(--bg-2);color:var(--text)}
+  .tab.loading .favicon::after{
+    content:"";position:absolute;inset:0;border-radius:5px;border:2px solid rgba(255,255,255,.25);
+    border-top-color:#fff;animation:spin .7s linear infinite;
+  }
+  .tab.loading .favicon{position:relative;color:transparent}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .empty{padding:14px 10px;color:var(--muted);font-size:12px;line-height:1.5}
+
+  /* ---------- Panneau historique ---------- */
+  .panel{
+    position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;
+    z-index:5;
+  }
+  .panel header{
+    display:flex;align-items:center;gap:6px;padding:12px 12px 8px;font-weight:600;font-size:12.5px;
+  }
+  .panel header .spacer{flex:1}
+  .panel input{
+    margin:0 12px 8px;padding:7px 10px;border-radius:9px;border:1px solid var(--line);
+    background:var(--bg-2);color:var(--text);font-family:inherit;font-size:12px;outline:none;
+  }
+  .panel input:focus{border-color:var(--accent)}
+  .hist{flex:1;overflow-y:auto;padding:0 8px 10px}
+  .hist-item{padding:6px 8px;border-radius:9px;cursor:default}
+  .hist-item:hover{background:var(--bg-hover)}
+  .hist-item .t{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hist-item .u{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hist-item .w{font-size:10.5px;color:var(--muted);opacity:.75}
+
+  /* ---------- Pied ---------- */
+  .footer{display:flex;align-items:center;gap:2px;padding:8px 10px 10px;border-top:1px solid var(--line)}
+  .footer .spacer{flex:1}
+  .newtab{
+    width:30px;height:30px;border-radius:9px;background:var(--bg-2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--text);
+  }
+  .newtab:hover{background:var(--bg-3)}
+  .newtab svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+
+  /* ---------- Popovers ---------- */
+  .popover{
+    position:fixed;background:var(--bg-2);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 18px 40px rgba(0,0,0,.45);padding:6px;z-index:20;min-width:190px;
+  }
+  .popover .row{
+    display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:8px;font-size:12.5px;
+    color:var(--text);cursor:default;
+  }
+  .popover .row:hover{background:var(--bg-3)}
+  .popover .row .k{margin-left:auto;color:var(--muted);font-size:11px}
+  .popover .row .sw{width:9px;height:9px;border-radius:99px}
+  .popover .sep{height:1px;background:var(--line);margin:5px 6px}
+  .popover .lbl{padding:6px 9px 3px;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.6px}
+  .ctx{position:fixed;z-index:30}
+</style>
+
+<style>
+/* ==================================================================
+   Habillage 1.3 — sobre et posé, dans l'esprit d'Arc.
+   Cette couche est ajoutée après la feuille d'origine : elle retire les
+   marqueurs « décoratifs » (dégradés, halos flous, ombres lourdes, pastilles
+   pilule, survols qui font sauter les éléments) et aligne les composants sur
+   une même grille de 4 px.
+   ================================================================== */
+  *{letter-spacing:-.006em}
+  h1{font-size:19px;font-weight:640;letter-spacing:-.022em;margin:0 0 4px}
+  h2{font-size:10.5px;letter-spacing:.085em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+  .lead{font-size:12.5px;line-height:1.55;color:var(--muted);margin-bottom:22px}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:6px}
+  .glow{display:none}
+
+  /* --- cartes et lignes --- */
+  .card{border:1px solid var(--line);border-radius:12px;box-shadow:none;overflow:hidden}
+  .row{gap:12px;padding:11px 14px;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}
+  .row .txt b{font-weight:560}
+  .row small{font-size:11.5px;line-height:1.5;margin-top:2px}
+
+  /* --- boutons --- */
+  .btn{
+    height:28px;padding:0 11px;border-radius:7px;background:var(--card);border:1px solid var(--line);
+    color:var(--text);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;
+    justify-content:center;gap:6px;transition:background .12s,border-color .12s;
+  }
+  .btn:hover{background:var(--card-hover);border-color:var(--line-2)}
+  .btn.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:550}
+  .btn.primary:hover{background:#7c85ec;border-color:transparent}
+  .btn.danger{color:var(--danger);border-color:rgba(229,83,75,.32);background:transparent}
+  .btn.danger:hover{background:rgba(229,83,75,.10);border-color:rgba(229,83,75,.45)}
+
+  /* --- interrupteurs --- */
+  .switch{width:36px;height:20px;border-radius:999px;background:var(--switch-off)}
+  .switch::after{width:14px;height:14px;top:3px;left:3px;box-shadow:0 1px 2px rgba(0,0,0,.22)}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{transform:translateX(16px)}
+
+  /* --- contrôles segmentés --- */
+  .seg{border-radius:8px;padding:2px;background:var(--card-hover);border-color:var(--line)}
+  .seg button{border-radius:6px;font-weight:500}
+  .seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.16)}
+  html[data-theme="light"] .seg button.on{background:#fff;box-shadow:0 1px 2px rgba(16,17,22,.08)}
+
+  /* --- pastilles et étiquettes --- */
+  .badge{border-radius:6px;font-weight:500;padding:2px 7px}
+
+  /* --- tableaux --- */
+  table{font-size:12.5px}
+  td{padding:8px 0}
+  kbd{border-radius:5px;font-size:10.5px}
+</style>
+<style>
+/* ---------- habillage 1.3 : barre latérale à la manière d'Arc ---------- */
+  .brand{padding:12px 10px 8px 12px}
+  .logo{font-size:13px;font-weight:640;letter-spacing:-.014em}
+  .logo svg{width:17px;height:17px}
+  .icon-btn{width:26px;height:26px;border-radius:7px;color:var(--muted)}
+  .icon-btn:hover{background:var(--bg-3);color:var(--text)}
+  .engine-chip{height:24px;border-radius:7px;background:transparent;border-color:transparent;
+    color:var(--muted);font-weight:500}
+  .engine-chip:hover{background:var(--bg-3);border-color:transparent;color:var(--text)}
+  .engine-chip .dot{width:13px;height:13px;border-radius:4px}
+  .engine-chip .dot img{width:100%;height:100%;display:block}
+  .tabs{gap:1px;padding:2px 6px 10px}
+  .tab{height:30px;min-height:30px;padding:0 6px;border-radius:7px;gap:9px}
+  .tab:hover{background:var(--bg-hover)}
+  .tab.active{background:var(--bg-3)}
+  .tab .title{font-size:12.5px}
+  .favicon{width:16px;height:16px;border-radius:4px;font-size:9.5px;font-weight:600}
+  .tab .close{width:18px;height:18px;border-radius:6px;font-size:13px;line-height:1}
+  .pinned{gap:4px;padding:2px 10px 10px}
+  .pin,.app{width:28px;height:28px;border-radius:7px;background:transparent;border-color:transparent}
+  .pin:hover,.app:hover{background:var(--bg-3);transform:none}
+  .pin.active{outline:2px solid var(--accent);outline-offset:0}
+  .apps{gap:4px;padding:0 10px 10px}
+  .app.app-more{border:1px dashed var(--line);color:var(--muted)}
+  .footer{border-top:1px solid var(--line)}
+  .footer .icon-btn{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="brand">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7a6bff"/><stop offset="1" stop-color="#3ac1ff"/>
+      </linearGradient></defs>
+      <path d="M12 2.2 21 7v10l-9 4.8L3 17V7z" fill="url(#g)"/>
+      <path d="M8.4 16V8.2l7.2 7.8V8" fill="none" stroke="#0d0d12" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Nova
+  </div>
+  <button id="engineBtn" class="engine-chip" title="Changer de moteur de recherche">
+    <span class="dot"></span><span id="engineName">Google</span>
+  </button>
+  <button class="icon-btn" id="menuBtn" title="Menu">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>
+  </button>
+</div>
+
+<section class="apps hidden" id="appsBar"></section>
+<section class="pinned hidden" id="pinnedBar"></section>
+<nav class="tabs" id="tabList"></nav>
+<div class="empty hidden" id="emptyHint">Aucun onglet ouvert.<br>Appuyez sur <b>Ctrl+T</b> pour commencer.</div>
+
+<div class="panel hidden" id="historyPanel">
+  <header>
+    <span>Historique</span><span class="spacer"></span>
+    <button class="icon-btn" id="clearHistory" title="Effacer tout l'historique">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/></svg>
+    </button>
+    <button class="icon-btn" id="closeHistory" title="Fermer">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </header>
+  <input id="historySearch" type="search" placeholder="Rechercher dans l'historique…" spellcheck="false">
+  <div class="hist" id="historyList"></div>
+</div>
+
+<footer class="footer">
+  <button class="newtab" id="newTab" title="Nouvel onglet (Ctrl+T)">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <span class="spacer"></span>
+  <button class="icon-btn" id="reopenBtn" title="Rouvrir l'onglet fermé (Ctrl+Maj+T)">
+    <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 3 6.2"/><path d="M4 18v-5h5"/></svg>
+  </button>
+  <button class="icon-btn" id="histBtn" title="Historique">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+  </button>
+  <button class="icon-btn" id="setBtn" title="Paramètres">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.6M12 18.6v2.6M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M2.8 12h2.6M18.6 12h2.6M4.6 19.4l1.9-1.9M17.5 6.5l1.9-1.9"/></svg>
+  </button>
+</footer>
+
+<div class="popover hidden" id="menuPop">
+  <div class="lbl">Onglets</div>
+  <div class="row" data-cmd="new_tab">Nouvel onglet<span class="k">Ctrl+T</span></div>
+  <div class="row" data-cmd="reopen">Rouvrir l'onglet fermé<span class="k">Ctrl+Maj+T</span></div>
+  <div class="sep"></div>
+  <div class="lbl">Affichage</div>
+  <div class="row" data-cmd="zoom_in">Zoom avant<span class="k">Ctrl++</span></div>
+  <div class="row" data-cmd="zoom_out">Zoom arrière<span class="k">Ctrl+-</span></div>
+  <div class="row" data-cmd="zoom_reset">Zoom 100 %<span class="k">Ctrl+0</span></div>
+  <div class="row" data-cmd="fullscreen">Plein écran<span class="k">F11</span></div>
+  <div class="sep"></div>
+  <div class="lbl">Nova</div>
+  <div class="row" data-cmd="history">Historique<span class="k">Ctrl+H</span></div>
+  <div class="row" data-cmd="settings">Paramètres<span class="k">Ctrl+,</span></div>
+  <div class="row" data-cmd="devtools">Outils de développement<span class="k">F12</span></div>
+  <div class="row" data-cmd="downloads">Téléchargements<span class="k"></span></div>
+  <div class="sep"></div>
+  <div class="row" data-cmd="quit">Quitter Nova<span class="k">Alt+F4</span></div>
+</div>
+
+<div class="popover hidden" id="enginePop"></div>
+
+<script>
+(function(){
+  "use strict";
+  let state = null;
+  let dragId = null;
+  /* Un nœud DOM par onglet, réutilisé d'un rafraîchissement à l'autre. */
+  const tabNodes = new Map();
+  /* Signature de l'historique déjà affiché (évite de le reconstruire pour rien). */
+  let historySig = null;
+  let historyWasOpen = false;
+
+  const $ = (id) => document.getElementById(id);
+  const post = (obj) => {
+    const json = JSON.stringify(obj);
+    try { window.ipc.postMessage(json); }
+    catch (e) { try { window.chrome.webview.postMessage(json); } catch (e2) {} }
+  };
+  const esc = (s) => String(s == null ? "" : s);
+
+  /* ---------- couleurs de repli pour les favicons ---------- */
+  function tint(str){
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) % 360;
+    return "hsl(" + h + ",58%,48%)";
+  }
+  function hostOf(url){
+    try {
+      if (url.indexOf("nova://") === 0) return "nova";
+      const u = new URL(url);
+      return u.hostname || u.protocol.replace(":","");
+    } catch (e) { return url || ""; }
+  }
+  /* Le favicon n'est instancié qu'une fois par onglet : l'ancienne version en
+     recréait un par rafraîchissement, ce qui relançait une requête d'image. */
+  /* Le favicon ne dépend que de l'hôte : un changement de titre ne doit donc
+     pas relancer de requête (l'ancienne version comparait aussi le titre, ce
+     qui re-téléchargeait l'image à chaque « (1) », « • », etc.). */
+  function applyFavicon(el, tab){
+    const box = el._favicon;
+    if (!box) return;
+    const host = hostOf(tab.url);
+    const letter = (tab.title || host || "?").trim().charAt(0).toUpperCase() || "?";
+
+    if (el._letter && el._letter.textContent !== letter) el._letter.textContent = letter;
+
+    if (el._favHost !== host) {
+      el._favHost = host;
+      if (el._img) { el._img.remove(); el._img = null; }
+      box.classList.remove("has-img");
+      box.style.background = tint(host || letter);
+
+      if (tab.url.indexOf("http") === 0 && host.indexOf(".") !== -1) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.decoding = "async";
+        img.src = "https://" + host + "/favicon.ico";
+        /* En cas d'échec, l'image disparaît et la lettre redevient visible. */
+        img.addEventListener("error", () => {
+          img.remove(); el._img = null;
+          box.classList.remove("has-img");
+          box.style.background = tint(host || letter);
+        });
+        box.appendChild(img);
+        el._img = img;
+        /* Style inline effacé : la plaque neutre de `.has-img` prend le relais
+           (un style inline l'emporterait sur la règle CSS). */
+        box.style.background = "";
+        box.classList.add("has-img");
+      }
+    }
+  }
+
+  function buildTab(tab, isPinned){
+    const el = document.createElement("div");
+    el.dataset.id = tab.id;
+    el.dataset.pinned = isPinned ? "1" : "0";
+    el.draggable = true;
+    el._favHost = null;
+    el._img = null;
+
+    const fav = document.createElement("span");
+    fav.className = isPinned ? "fav" : "favicon";
+    /* La lettre de repli est un nœud distinct : le favicon la recouvre au lieu
+       de s'afficher à côté d'elle (les deux enfants étaient côte à côte). */
+    const letter = document.createElement("span");
+    letter.className = "letter";
+    fav.appendChild(letter);
+    el._favicon = fav;
+    el._letter = letter;
+    el.appendChild(fav);
+
+    if (!isPinned) {
+      const title = document.createElement("span");
+      title.className = "title";
+      el._title = title;
+      el.appendChild(title);
+
+      const close = document.createElement("button");
+      close.className = "close";
+      close.textContent = "\u2715";
+      close.title = "Fermer l'onglet";
+      close.addEventListener("click", (e) => { e.stopPropagation(); post({cmd:"close_tab", id:tab.id}); });
+      el.appendChild(close);
+    }
+
+    el.addEventListener("click", () => post({cmd:"select_tab", id:tab.id}));
+    el.addEventListener("auxclick", (e) => { if (e.button === 1) post({cmd:"close_tab", id:tab.id}); });
+    el.addEventListener("contextmenu", (e) => { e.preventDefault(); openTabMenu(e, tab); });
+
+    el.addEventListener("dragstart", (e) => { dragId = tab.id; el.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+    el.addEventListener("dragend", () => { dragId = null; el.classList.remove("dragging"); });
+    el.addEventListener("dragover", (e) => {
+      if (dragId == null || dragId === tab.id) return;
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      const after = (e.clientY - r.top) > r.height / 2;
+      el.classList.toggle("drop-after", after);
+      el.classList.toggle("drop-before", !after);
+    });
+    el.addEventListener("dragleave", () => { el.classList.remove("drop-after","drop-before"); });
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const after = el.classList.contains("drop-after");
+      el.classList.remove("drop-after","drop-before");
+      if (dragId == null || dragId === tab.id) return;
+      post({cmd:"move_tab", id:dragId, target:tab.id, after:after});
+    });
+
+    return el;
+  }
+
+  function updateTab(el, tab, isPinned){
+    const want = (isPinned ? "pin" : "tab")
+      + (tab.active ? " active" : "")
+      + (tab.loading && !isPinned ? " loading" : "");
+    if (el.className !== want) el.className = want;
+
+    if (!isPinned && el._title) {
+      const label = tab.title || "Sans titre";
+      if (el._title.textContent !== label) el._title.textContent = label;
+    }
+    el.title = (tab.title || "") + "\n" + (tab.url || "");
+    applyFavicon(el, tab);
+  }
+  /* ---------- rendu des onglets ---------- */
+  /* Les nœuds existants sont réutilisés puis réordonnés (`appendChild` déplace
+     le nœud au lieu de le recréer) : plus de reconstruction complète. */
+  /* `seen` est partagé entre les deux listes (épinglés / normaux) : le
+     nettoyage avait lieu dans chaque appel, si bien qu'afficher les onglets
+     épinglés détruisait tous les nœuds des onglets normaux — donc une
+     reconstruction complète et un nouveau téléchargement des favicons à
+     chaque rafraîchissement. */
+  function syncTabs(list, container, isPinned, seen){
+    list.forEach((tab) => {
+      seen.add(tab.id);
+      let el = tabNodes.get(tab.id);
+      if (el && el.parentNode !== container) {
+        el.remove();
+        tabNodes.delete(tab.id);
+        el = null;
+      }
+      if (!el) {
+        el = buildTab(tab, isPinned);
+        tabNodes.set(tab.id, el);
+      }
+      updateTab(el, tab, isPinned);
+      container.appendChild(el);
+    });
+  }
+
+  /* Supprime les nœuds des onglets réellement fermés (une seule fois,
+     après avoir rempli les deux listes). */
+  function pruneTabs(seen){
+    Array.from(tabNodes.keys()).forEach((id) => {
+      if (!seen.has(id)) {
+        const el = tabNodes.get(id);
+        if (el) el.remove();
+        tabNodes.delete(id);
+      }
+    });
+  }
+  /* ---------- favoris (apps) ---------- */
+  /* La signature évite de reconstruire la rangée (et de relancer les requêtes
+     de favicons) à chaque repaint : elle ne change que si la liste change. */
+  let appsSig = null;
+  function renderApps(list){
+    const bar = $("appsBar");
+    /* Un import peut apporter des centaines de favoris : la barre latérale
+       n'en montre que les premiers (SIDEBAR_APPS), les autres restent sur la
+       page Nouvel onglet — sinon la liste des onglets serait écrasée. */
+    const LIMIT = (state.limits && state.limits.sidebar_apps) || 24;
+    const total = list.length;
+    const shown = total > LIMIT ? list.slice(0, LIMIT) : list;
+    const sig = shown.map((f) => f.url + "|" + f.title).join("~") + "#" + total;
+    if (sig === appsSig) return;
+    appsSig = sig;
+    bar.classList.toggle("hidden", total === 0);
+    bar.textContent = "";
+    if (total > LIMIT) {
+      const more = document.createElement("button");
+      more.className = "app app-more";
+      more.title = (total - LIMIT) + " autres favoris : cliquez pour les voir tous";
+      more.textContent = "+" + (total - LIMIT);
+      more.addEventListener("click", () => post({cmd:"open_url", url:"nova://newtab"}));
+      bar.appendChild(more);
+    }
+    shown.forEach((fav) => {
+      const host = hostOf(fav.url);
+      const el = document.createElement("button");
+      el.className = "app";
+      el.title = (fav.title || host || fav.url) + "\n" + fav.url;
+      const box = document.createElement("span");
+      box.className = "fav";
+      const letter = document.createElement("span");
+      letter.className = "letter";
+      letter.textContent = ((fav.title || host || "?").trim().charAt(0) || "?").toUpperCase();
+      box.style.background = tint(host);
+      box.appendChild(letter);
+      if (fav.url.indexOf("http") === 0 && host.indexOf(".") !== -1) {
+        const img = document.createElement("img");
+        img.alt = "";
+        img.decoding = "async";
+        img.src = "https://" + host + "/favicon.ico";
+        img.addEventListener("error", () => {
+          img.remove();
+          box.classList.remove("has-img");
+          box.style.background = tint(host);
+        });
+        box.appendChild(img);
+        box.style.background = "";
+        box.classList.add("has-img");
+      }
+      el.appendChild(box);
+      el.addEventListener("click", () => post({cmd:"open_url", url:fav.url, new_tab:false}));
+      el.addEventListener("auxclick", (e) => { if (e.button === 1) post({cmd:"open_url", url:fav.url, new_tab:true}); });
+      el.addEventListener("contextmenu", (e) => { e.preventDefault(); openAppMenu(e, fav); });
+      bar.appendChild(el);
+    });
+  }
+
+  function openAppMenu(e, fav){
+    closeCtx();
+    ctx = document.createElement("div");
+    ctx.className = "popover ctx";
+    const items = [
+      ["Ouvrir", () => post({cmd:"open_url", url:fav.url, new_tab:false})],
+      ["Ouvrir dans un nouvel onglet", () => post({cmd:"open_url", url:fav.url, new_tab:true})],
+      ["Copier l'adresse", () => post({cmd:"copy_text", text:fav.url})],
+      ["Retirer des favoris", () => post({cmd:"remove_favorite", url:fav.url})]
+    ];
+    items.forEach(([label, fn]) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.textContent = label;
+      row.addEventListener("click", () => { closeCtx(); fn(); });
+      ctx.appendChild(row);
+    });
+    document.body.appendChild(ctx);
+    const w = 220, h = ctx.offsetHeight;
+    const x = Math.min(e.clientX, window.innerWidth - w - 8);
+    const y = Math.min(e.clientY, window.innerHeight - h - 8);
+    ctx.style.left = Math.max(8, x) + "px";
+    ctx.style.top = Math.max(8, y) + "px";
+  }
+
+  /* ---------- menu contextuel d'un onglet ---------- */
+  let ctx = null;
+  function openTabMenu(e, tab){
+    closeCtx();
+    ctx = document.createElement("div");
+    ctx.className = "popover ctx";
+    const items = [
+      [tab.pinned ? "Désépingler" : "Épingler", () => post({cmd: tab.pinned ? "unpin_tab" : "pin_tab", id: tab.id})],
+      ["Dupliquer l'onglet", () => post({cmd:"duplicate_tab", id: tab.id})],
+      ["Copier l'adresse", () => post({cmd:"copy_url", id: tab.id})],
+      ["Recharger", () => post({cmd:"reload_tab", id: tab.id})],
+      ["Fermer", () => post({cmd:"close_tab", id: tab.id})],
+      ["Fermer les autres", () => post({cmd:"close_others", id: tab.id})]
+    ];
+    items.forEach(([label, fn]) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.textContent = label;
+      row.addEventListener("click", () => { closeCtx(); fn(); });
+      ctx.appendChild(row);
+    });
+    document.body.appendChild(ctx);
+    const w = 200, h = ctx.offsetHeight;
+    const x = Math.min(e.clientX, window.innerWidth - w - 8);
+    const y = Math.min(e.clientY, window.innerHeight - h - 8);
+    ctx.style.left = x + "px";
+    ctx.style.top = Math.max(8, y) + "px";
+  }
+  function closeCtx(){ if (ctx) { ctx.remove(); ctx = null; } }
+  document.addEventListener("click", closeCtx);
+
+  /* ---------- historique ---------- */
+  function relative(ts){
+    const s = Math.max(1, Math.floor(Date.now()/1000) - ts);
+    if (s < 60) return "à l'instant";
+    if (s < 3600) return "il y a " + Math.floor(s/60) + " min";
+    if (s < 86400) return "il y a " + Math.floor(s/3600) + " h";
+    if (s < 604800) return "il y a " + Math.floor(s/86400) + " j";
+    return new Date(ts*1000).toLocaleDateString("fr-FR");
+  }
+  function renderHistory(force){
+    if (!state) return;
+    const filter = ($("historySearch").value || "");
+    const sig = (state.history_rev || 0) + "|" + filter;
+    if (!force && sig === historySig) return;
+    historySig = sig;
+
+    const list = $("historyList");
+    if ($("historyPanel").classList.contains("hidden")) return;
+
+    list.textContent = "";
+    const rows = (state.history || []).filter((h) =>
+      !filter || h.title.toLowerCase().includes(filter.toLowerCase()) || h.url.toLowerCase().includes(filter.toLowerCase()));
+    if (!rows.length) {
+      const p = document.createElement("div");
+      p.className = "empty";
+      p.textContent = "Aucune entrée.";
+      list.appendChild(p);
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    rows.forEach((h) => {
+      const it = document.createElement("div");
+      it.className = "hist-item";
+      it.title = h.url;
+      const t = document.createElement("div"); t.className = "t"; t.textContent = h.title || h.url;
+      const u = document.createElement("div"); u.className = "u"; u.textContent = hostOf(h.url);
+      const w = document.createElement("div"); w.className = "w"; w.textContent = relative(h.ts);
+      it.append(t, u, w);
+      it.addEventListener("click", () => post({cmd:"open_url", url:h.url, new_tab:false}));
+      it.addEventListener("auxclick", (e) => { if (e.button === 1) post({cmd:"open_url", url:h.url, new_tab:true}); });
+      it.addEventListener("contextmenu", (e) => { e.preventDefault(); post({cmd:"forget_url", url:h.url}); });
+      frag.appendChild(it);
+    });
+    list.appendChild(frag);
+  }
+  /* ---------- API appelée depuis Rust ---------- */
+  window.NovaUI = {
+    render(next){
+      state = next;
+      /* `next.dark` est calculé par Rust (« Système » déjà résolu en clair ou
+         sombre) ; repli sur `theme` pour un état incomplet. */
+      const dark = (typeof next.dark === "boolean") ? next.dark : next.theme !== "light";
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+      /* `var(--bg)` suit la couleur de fond personnalisée. */
+      document.body.style.background = "var(--bg)";
+
+      const eng = (next.engines || []).find((e) => e.id === next.config.engine) || {name:"—", color:"#666"};
+      $("engineName").textContent = eng.name;
+      if (window.NovaEngineIcon) window.NovaEngineIcon(document.querySelector("#engineBtn .dot"), eng);
+      else document.querySelector("#engineBtn .dot").style.background = eng.color;
+
+      /* Couleur de fond choisie dans les paramètres (vide = thème standard). */
+      if (window.NovaSkin) window.NovaSkin.apply(next.ui_bg);
+      renderApps(next.favorites || []);
+
+      const pinned = next.tabs.filter((t) => t.pinned);
+      const plain = next.tabs.filter((t) => !t.pinned);
+      const pinnedBar = $("pinnedBar");
+      pinnedBar.classList.toggle("hidden", pinned.length === 0);
+      const seen = new Set();
+      syncTabs(pinned, pinnedBar, true, seen);
+      syncTabs(plain, $("tabList"), false, seen);
+      pruneTabs(seen);
+      $("emptyHint").classList.toggle("hidden", next.tabs.length > 0);
+      $("reopenBtn").style.opacity = (next.closed_count > 0) ? "1" : ".4";
+
+      if (next.history_open) $("historyPanel").classList.remove("hidden");
+      else $("historyPanel").classList.add("hidden");
+      renderHistory(next.history_open && !historyWasOpen);
+      historyWasOpen = next.history_open;
+    },
+    focusTab(id){
+      const el = document.querySelector('.tab[data-id="' + id + '"]');
+      if (el) el.scrollIntoView({block:"nearest"});
+    }
+  };
+
+  /* ---------- interactions ---------- */
+  $("newTab").addEventListener("click", () => post({cmd:"new_tab"}));
+  $("histBtn").addEventListener("click", () => post({cmd:"toggle_history"}));
+  $("closeHistory").addEventListener("click", () => post({cmd:"toggle_history", open:false}));
+  $("clearHistory").addEventListener("click", () => { if (confirm("Effacer tout l'historique ?")) post({cmd:"clear_history"}); });
+  $("historySearch").addEventListener("input", () => renderHistory(true));
+  $("reopenBtn").addEventListener("click", () => post({cmd:"reopen"}));
+  $("setBtn").addEventListener("click", () => post({cmd:"settings"}));
+
+  function togglePop(el, anchor, align){
+    const open = el.classList.contains("hidden");
+    document.querySelectorAll(".popover").forEach((p) => p.classList.add("hidden"));
+    if (!open) return;
+    el.classList.remove("hidden");
+    const r = anchor.getBoundingClientRect();
+    el.style.top = (r.bottom + 6) + "px";
+    if (align === "right") el.style.left = Math.max(8, r.right - el.offsetWidth) + "px";
+    else el.style.left = Math.max(8, Math.min(r.left, window.innerWidth - el.offsetWidth - 8)) + "px";
+  }
+
+  $("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); togglePop($("menuPop"), $("menuBtn"), "right"); });
+  $("menuPop").addEventListener("click", (e) => {
+    const row = e.target.closest(".row");
+    if (!row) return;
+    $("menuPop").classList.add("hidden");
+    const cmd = row.dataset.cmd;
+    post({cmd:cmd});
+  });
+
+  $("engineBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const pop = $("enginePop");
+    pop.textContent = "";
+    const lbl = document.createElement("div");
+    lbl.className = "lbl";
+    lbl.textContent = "Moteur de recherche";
+    pop.appendChild(lbl);
+    (state.engines || []).forEach((eng) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const sw = document.createElement("span");
+      sw.className = "sw";
+      sw.style.background = eng.color;
+      const nm = document.createElement("span");
+      nm.textContent = eng.name;
+      const kb = document.createElement("span");
+      kb.className = "k";
+      kb.textContent = eng.bang;
+      row.append(sw, nm, kb);
+      row.addEventListener("click", () => { pop.classList.add("hidden"); post({cmd:"set_engine", engine:eng.id}); });
+      pop.appendChild(row);
+    });
+    const sep = document.createElement("div");
+    sep.className = "sep";
+    const row = document.createElement("div");
+    row.className = "row";
+    row.textContent = "Autres moteurs…";
+    row.addEventListener("click", () => { pop.classList.add("hidden"); post({cmd:"settings"}); });
+    pop.append(sep, row);
+    togglePop(pop, $("engineBtn"), "left");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".popover") && !e.target.closest("#menuBtn") && !e.target.closest("#engineBtn")) {
+      document.querySelectorAll(".popover").forEach((p) => p.classList.add("hidden"));
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.querySelectorAll(".popover").forEach((p) => p.classList.add("hidden"));
+    }
+  });
+  /* Les raccourcis clavier de la barre latérale sont relayés à Rust. */
+  document.addEventListener("keydown", (e) => {
+    const k = e.key;
+    if (e.ctrlKey && !e.shiftKey && k.toLowerCase() === "t") { e.preventDefault(); post({cmd:"new_tab"}); }
+    else if (e.ctrlKey && e.shiftKey && k.toLowerCase() === "t") { e.preventDefault(); post({cmd:"reopen"}); }
+    else if (e.ctrlKey && !e.shiftKey && k.toLowerCase() === "w") { e.preventDefault(); post({cmd:"close_active"}); }
+    else if (e.ctrlKey && !e.shiftKey && k.toLowerCase() === "h") { e.preventDefault(); post({cmd:"toggle_history"}); }
+    else if (e.ctrlKey && k === ",") { e.preventDefault(); post({cmd:"settings"}); }
+  });
+})();
+</script>
+</body>
+</html>
